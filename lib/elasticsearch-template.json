@@ -2,96 +2,34 @@
 	"template": "mail-*",
 	"settings": {
 		"number_of_shards": 1,
-		"index": {
-			"analysis": {
-				"tokenizer": {
-					"email_domain_tokenizer": {
-						"type": "pattern",
-						"pattern": "^.+@",
-						"group": -1
-					}
-				},
-				"analyzer": {
-					"email_domain_analyzer": {
-						"type": "custom",
-						"tokenizer": "email_domain_tokenizer"
-					}
-				}
-			}
-		}
+		"number_of_replicas": 1
 	},
 	"mappings": {
-		"log": {
-			"dynamic_templates" : [
-				{
-					"string_fields" : {
-						"match" : "*",
-						"match_mapping_type" : "string",
-						"mapping" : {
-							"type" : "string",
-							"index" : "analyzed",
-							"omit_norms" : true,
-							"fielddata" : {
-								"format" : "disabled"
-							},
-							"fields" : {
-								"raw" : {
-									"type": "string",
-									"index" : "not_analyzed"
-								}
-							}
-						}
-					}
-				}
-			],
-			"properties": {
-				"email": {
-					"type" : "string",
-					"index" : "analyzed",
-					"omit_norms" : true,
-					"fielddata" : {
-						"format" : "disabled"
-					},
-					"fields" : {
-						"raw" : {
-							"type": "string",
-							"index" : "not_analyzed"
-						},
-						"domain" : {
-							"type": "string",
-							"index": "analyzed",
-							"analyzer": "email_domain_analyzer"
-						}
-					}
-				},
-				"timestamp": {
-					"type": "date",
-					"format": "epoch_second"
-				},
-				"date": {
-					"type": "date",
-					"format": "yyyy.MM.dd"
-				},
-				"event": {
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"ip": {
-					"type": "ip",
-					"index": "not_analyzed"
-				},
-				"sg_event_id": {
-					"type": "string",
-					"index": "not_analyzed"
-				},
-				"sg_message_id": {
-					"type": "string",
-					"index": "not_analyzed"
-				}
+		"properties": {
+			"type": {
+				"type": "keyword"
+			},
+			"email": {
+				"type": "keyword"
+			},
+			"timestamp": {
+				"type": "date"
+			},
+			"date": {
+				"type": "date"
+			},
+			"event": {
+				"type": "text"
+			},
+			"ip": {
+				"type": "keyword"
+			},
+			"sg_event_id": {
+				"type": "keyword"
+			},
+			"sg_message_id": {
+				"type": "keyword"
 			}
 		}
-	},
-	"aliases" : {
-		"mail": {}
 	}
 }

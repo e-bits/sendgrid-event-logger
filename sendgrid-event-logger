@@ -15,7 +15,7 @@
 
 "use strict";
 
-var elastic = require('elasticsearch');
+const { Client } = require('@elastic/elasticsearch');
 var express = require('express');
 var basicauth = require('basicauth-middleware');
 var server = require('./lib/server');
@@ -34,17 +34,7 @@ if (process.argv[2] == 'install') {
 }
 var conf = configParser(fs);
 
-var indexer = new elastic.Client({
-	host: conf.elasticsearch_host,
-	log: function(){
-		this.error = ()=>{};
-		this.warning = ()=>{};
-		this.info = ()=>{};
-		this.debug = ()=>{};
-		this.trace = ()=>{};
-		this.close = ()=>{};
-	}
-});
+var indexer = new Client({ node: conf.elasticsearch_host });
 
 if (process.argv[2] == 'install') {
 	checkElasticConnection(indexer,function(){
