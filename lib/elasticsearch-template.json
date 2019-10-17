@@ -1,35 +1,22 @@
 {
-	"template": "mail-*",
+	"index_patterns": "mail-*",
 	"settings": {
 		"number_of_shards": 1,
 		"number_of_replicas": 1
 	},
 	"mappings": {
 		"properties": {
-			"type": {
-				"type": "keyword"
-			},
-			"email": {
-				"type": "keyword"
-			},
 			"timestamp": {
-				"type": "date"
+				"type": "date",
+				"format": "epoch_second"
 			},
 			"date": {
-				"type": "date"
-			},
-			"event": {
-				"type": "text"
-			},
-			"ip": {
-				"type": "keyword"
-			},
-			"sg_event_id": {
-				"type": "keyword"
-			},
-			"sg_message_id": {
-				"type": "keyword"
+				"type": "date",
+				"format": "yyyy.MM.dd"
 			}
 		}
+	},
+	"aliases" : {
+		"mail": {}
 	}
 }
