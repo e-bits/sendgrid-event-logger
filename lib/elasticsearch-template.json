@@ -1,22 +1,22 @@
 {
-	"index_patterns": "mail-*",
-	"settings": {
-		"number_of_shards": 1,
-		"number_of_replicas": 1
-	},
-	"mappings": {
-		"properties": {
-			"timestamp": {
-				"type": "date",
-				"format": "epoch_second"
-			},
-			"date": {
-				"type": "date",
-				"format": "yyyy.MM.dd"
-			}
-		}
-	},
-	"aliases" : {
-		"mail": {}
-	}
+    "template": "sendgrid_template",
+    "index_patterns": ["mail*"],
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 1
+    },
+    "mappings": {
+        "_source": {
+            "enabled": true
+        },
+        "properties": {
+            "timestamp": {
+                "type": "date",
+                "format": "epoch_second"
+            }
+        }
+    },
+    "aliases": {
+        "mail": {}
+    }
 }
