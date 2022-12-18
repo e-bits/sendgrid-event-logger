@@ -2,11 +2,11 @@
 
 /*
  * Copyright (C) 2016 TrustedCompany.com
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published bythe Free Software Foundation
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -15,96 +15,73 @@
 
 "use strict";
 
-const { Client } = require('@elastic/elasticsearch');
-var express = require('express');
-var basicauth = require('basicauth-middleware');
-var server = require('./lib/server');
-var error500 = require('./lib/error500');
-var https = require('https');
-var fs = require('fs');
-var print = require('./lib/print');
-var cleaner = require('./lib/cleanup-logs');
-var postMiddleware = require('./lib/json-post-middleware');
-var checkElasticConnection = require('./lib/elasticsearch-check');
+const { Client } = require("@elastic/elasticsearch");
+var express = require("express");
+var server = require("./lib/server");
+var error500 = require("./lib/error500");
+var fs = require("fs");
+var print = require("./lib/print");
+var cleaner = require("./lib/cleanup-logs");
+var postMiddleware = require("./lib/json-post-middleware");
+var checkElasticConnection = require("./lib/elasticsearch-check");
 
-var configParser = require('./lib/config');
+var configParser = require("./lib/config");
 
-if (process.argv[2] == 'install') {
-	configParser.init(fs);
+if (process.argv[2] == "install") {
+  configParser.init(fs);
 }
 var conf = configParser(fs);
 
 var indexer = new Client({ node: conf.elasticsearch_host });
 
-if (process.argv[2] == 'install') {
-	checkElasticConnection(indexer,function(){
-		process.exit();
-	});
-}
-else {
-	checkElasticConnection(indexer,()=>{
-		var app = express();
-		
-		server.init(indexer);
-		
-		if (conf.use_basicauth) {
-			app.use(basicauth(
-				conf.basicauth.user,
-				conf.basicauth.password
-			));
-		}
-		
-		// We serve only JSON data:
-		app.use(function(req, res, next) {
-			res.setHeader('Content-Type', 'application/json');
-			next();
-		});
-		
-		app.post('/logger',
-			postMiddleware,
-			server.logger
-		);
-		app.get('/status',
-			server.status
-		);
-		app.get('/copyright',
-			server.copyright
-		);
-		app.get('/version',function(req,res){
-			var p = require('./package.json');
-			res.end(JSON.stringify({
-				name: p.name,
-				version: p.version,
-				repository: p.repository.url
-			}));
-		});
-		
-		// Handle 404
-		app.use(function(req, res) {
-			res.status(400);
-			res.end(JSON.stringify({
-				status: "error",
-				error: 404
-			}));
-		});
-		
-		
-		app.use(function(error, req, res, next) {
-			error500(res);
-		});
-		
-		if (conf.use_https) {
-			var credentials = {
-				key: fs.readFileSync(conf.https.key_file, 'utf8'),
-				cert: fs.readFileSync(conf.https.cert_file, 'utf8')
-			};
-			var httpsServer = https.createServer(credentials, app);
-			httpsServer.listen(conf.port);
-		}
-		else {
-			app.listen(conf.port);
-		}
-		console.log('Server started..');
-		setInterval(cleaner(indexer,conf.days_to_retain_log),cleaner.days(1));
-	});
+if (process.argv[2] == "install") {
+  checkElasticConnection(indexer, function () {
+    process.exit();
+  });
+} else {
+  checkElasticConnection(indexer, () => {
+    var app = express();
+
+    server.init(indexer);
+
+    // We serve only JSON data:
+    app.use(function (req, res, next) {
+      res.setHeader("Content-Type", "application/json");
+      next();
+    });
+
+    app.post("/logger", postMiddleware, server.logger);
+    app.get("/status", server.status);
+    app.get("/copyright", server.copyright);
+    app.get("/version", function (req, res) {
+      var p = require("./package.json");
+      res.end(
+        JSON.stringify({
+          name: p.name,
+          version: p.version,
+          repository: p.repository.url,
+        })
+      );
+    });
+
+    // Handle 404
+    app.use(function (req, res) {
+      res.status(400);
+      res.end(
+        JSON.stringify({
+          status: "error",
+          error: 404,
+        })
+      );
+    });
+
+    app.use(function (error, req, res, next) {
+      error500(res);
+    });
+
+    app.listen(conf.port);
+
+    console.log("Server started..");
+    setInterval(cleaner(indexer, conf.days_to_retain_log), cleaner.days(1));
+  });
 }
