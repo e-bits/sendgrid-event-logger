@@ -1,15 +1,5 @@
 {
   "elasticsearch_host": "localhost:9200",
   "port": 8080,
-  "use_basicauth": false,
-  "basicauth" : {
-    "user": "",
-    "password": ""
-  },
-  "use_https": false,
-  "https": {
-  	"key_file": "",
-  	"cert_file": ""
-  },
-  "days_to_retain_log": 365
+  "days_to_retain_log": 0
 }
